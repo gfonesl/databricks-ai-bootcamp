@@ -52,6 +52,11 @@ class WeatherApiTests(unittest.TestCase):
         )
         self.client = self.app.test_client()
 
+    def test_home_page_explains_the_api_console(self):
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Weather Intelligence", response.data)
+        self.assertIn(b"Sync weather data", response.data)
     def test_sync_persists_documents_and_keeps_location_warning(self):
         response = self.client.post("/weather/sync", json={"locations": ["Chicago, IL"], "limit": 10})
         self.assertEqual(response.status_code, 200)

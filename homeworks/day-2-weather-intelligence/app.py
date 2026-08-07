@@ -67,6 +67,76 @@ def create_app(
     def healthz():
         return jsonify({"status": "ok", "service": "day2-weather-intelligence"})
 
+    @app.get("/")
+    def home():
+        return """
+        <!doctype html>
+        <html lang="en">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>Weather Intelligence</title>
+          <style>
+            :root { color-scheme: dark; font-family: Inter, system-ui, sans-serif; }
+            body { margin: 0; background: #101114; color: #f5f7fa; }
+            main { max-width: 880px; margin: 0 auto; padding: 48px 24px 64px; }
+            .eyebrow { color: #8db4ff; font-size: .9rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+            h1 { font-size: clamp(2rem, 5vw, 3.4rem); margin: 10px 0; }
+            p { color: #c5cad3; line-height: 1.55; }
+            .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-top: 28px; }
+            section { background: #191b20; border: 1px solid #30333a; border-radius: 14px; padding: 20px; }
+            h2 { margin-top: 0; font-size: 1.1rem; }
+            input { box-sizing: border-box; width: 100%; margin: 9px 0; padding: 11px; border: 1px solid #50545d; border-radius: 8px; background: #101114; color: #f5f7fa; }
+            button { margin-top: 8px; padding: 10px 14px; border: 0; border-radius: 8px; background: #3d7eff; color: #fff; font-weight: 700; cursor: pointer; }
+            button:disabled { opacity: .6; cursor: wait; }
+            pre { min-height: 46px; max-height: 320px; overflow: auto; white-space: pre-wrap; color: #b9d5ff; }
+            code { color: #b9d5ff; }
+          </style>
+        </head>
+        <body>
+          <main>
+            <div class="eyebrow">Databricks AI Bootcamp · Day 2</div>
+            <h1>Weather Intelligence</h1>
+            <p>Weather documents from the National Weather Service, stored in Lakebase and retrieved with pgvector semantic search.</p>
+            <div class="grid">
+              <section>
+                <h2>1. Sync NWS documents</h2>
+                <p>Fetch current forecast narratives for Chicago and Austin.</p>
+                <button id="sync">Sync weather data</button>
+                <pre id="sync-output">Ready.</pre>
+              </section>
+              <section>
+                <h2>2. Search semantically</h2>
+                <input id="query" value="flash flood risk this weekend" aria-label="Search query">
+                <input id="top-k" type="number" min="1" max="20" value="5" aria-label="Number of results">
+                <button id="search">Search Lakebase</button>
+                <pre id="search-output">Run sync and embeddings before searching a new database.</pre>
+              </section>
+            </div>
+            <p><code>GET /healthz</code> · <code>POST /weather/sync</code> · <code>POST /weather/search</code></p>
+          </main>
+          <script>
+            async function callApi(path, body, output, button) {
+              button.disabled = true;
+              output.textContent = 'Working…';
+              try {
+                const response = await fetch(path, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
+                const payload = await response.json();
+                output.textContent = JSON.stringify(payload, null, 2);
+              } catch (error) {
+                output.textContent = `Request failed: ${error.message}`;
+              } finally {
+                button.disabled = false;
+              }
+            }
+            const syncButton = document.getElementById('sync');
+            syncButton.addEventListener('click', () => callApi('/weather/sync', {locations: ['Chicago, IL', 'Austin, TX'], limit: 50}, document.getElementById('sync-output'), syncButton));
+            const searchButton = document.getElementById('search');
+            searchButton.addEventListener('click', () => callApi('/weather/search', {query: document.getElementById('query').value, top_k: Number(document.getElementById('top-k').value)}, document.getElementById('search-output'), searchButton));
+          </script>
+        </body>
+        </html>
+        """
     @app.post("/weather/sync")
     def sync_weather():
         try:
