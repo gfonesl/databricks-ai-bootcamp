@@ -1,0 +1,9 @@
+command:
+  - sh
+  - -c
+  - gunicorn app:app --workers 1 --threads 4 --bind 0.0.0.0:${DATABRICKS_APP_PORT}
+env:
+  - name: LAKEBASE_ENDPOINT
+    valueFrom: postgres
+  - name: WEATHER_HTTP_USER_AGENT
+    value: weather-intelligence-bootcamp/1.0

@@ -1,0 +1,8 @@
+{
+  "input": [
+    {
+      "role": "user",
+      "content": "Qual é o contexto meteorológico e de viagem disponível para Chicago? Use as ferramentas antes de responder."
+    }
+  ]
+}

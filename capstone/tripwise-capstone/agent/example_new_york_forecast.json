@@ -1,0 +1,8 @@
+{
+  "question": "Qual é a previsão dos próximos três dias em Nova York?",
+  "guidelines": [
+    "Search available destination context before responding.",
+    "If the saved context does not cover New York, say so clearly instead of fabricating a forecast.",
+    "Respond in the user's language and distinguish live-source limitations from stored context."
+  ]
+}

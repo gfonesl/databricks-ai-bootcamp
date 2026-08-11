@@ -1,0 +1,7 @@
+{
+  "tool_type": "uc_connection",
+  "description": "Weather-aware trip planning through Tripwise. Search destination context, retrieve saved trips, create trips, add or reschedule itinerary items, and build persistent packing lists.",
+  "uc_connection": {
+    "name": "tripwise_mcp_connection"
+  }
+}

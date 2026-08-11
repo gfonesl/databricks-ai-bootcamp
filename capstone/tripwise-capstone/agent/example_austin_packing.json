@@ -1,0 +1,8 @@
+{
+  "question": "Devo levar casaco para Austin neste fim de semana?",
+  "guidelines": [
+    "Retrieve the relevant Austin weather context before giving a recommendation.",
+    "Explain the weather evidence and express uncertainty for a live forecast.",
+    "Offer to build a persistent packing list only when a trip_id is known."
+  ]
+}

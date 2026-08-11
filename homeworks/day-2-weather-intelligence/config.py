@@ -1,0 +1,11 @@
+APP_SCHEMA = "weather_intelligence"
+DOCUMENTS_TABLE = f"{APP_SCHEMA}.weather_documents"
+EMBEDDINGS_TABLE = f"{APP_SCHEMA}.weather_embeddings"
+
+EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+EMBEDDING_DIMENSIONS = 384
+CHUNK_SIZE = 800
+CHUNK_OVERLAP = 100
+DEFAULT_LOCATIONS = ["Chicago, IL", "Austin, TX"]
+MAX_SYNC_LIMIT = 50
+MAX_SEARCH_RESULTS = 20

@@ -1,0 +1,9 @@
+databricks-sdk>=0.81.0
+fastapi>=0.115.0
+fastmcp>=2.14.0,<3.0.0
+psycopg2-binary>=2.9.10
+requests>=2.32.0
+sentence-transformers>=3.0.0
+uvicorn[standard]>=0.30.0
+pytest>=8.0.0
+

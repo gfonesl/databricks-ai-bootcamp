@@ -1,0 +1,97 @@
+bundle:
+  name: tripwise-capstone
+
+variables:
+  postgres_branch:
+    description: Full Lakebase Postgres branch resource name.
+  postgres_database:
+    description: Full Lakebase Postgres database resource name.
+  lakebase_endpoint:
+    description: Full Lakebase Postgres endpoint resource name used by the Spark job.
+  pipeline_api_url:
+    description: Public Tripwise App URL used for authenticated Lakebase writes from serverless.
+  pipeline_oauth_client_id:
+    description: OAuth client ID for the Tripwise pipeline service principal.
+  pipeline_oauth_secret_scope:
+    description: Databricks secret scope holding the pipeline OAuth secret.
+  pipeline_oauth_secret_key:
+    description: Secret key holding the pipeline OAuth secret.
+
+resources:
+  apps:
+    tripwise_app:
+      name: tripwise-capstone
+      description: AI travel and outdoor activity planner with Lakebase, Spark and MCP.
+      source_code_path: .
+      resources:
+        - name: postgres
+          postgres:
+            branch: ${var.postgres_branch}
+            database: ${var.postgres_database}
+            permission: CAN_CONNECT_AND_CREATE
+  jobs:
+    tripwise_daily_context:
+      name: Tripwise daily destination context
+      description: Daily Spark ingestion and Lakebase vectorization for Tripwise.
+      schedule:
+        quartz_cron_expression: 0 0 7 * * ?
+        timezone_id: America/Sao_Paulo
+        pause_status: PAUSED
+      environments:
+        - environment_key: tripwise_python
+          spec:
+            client: "4"
+            dependencies:
+              - databricks-sdk>=0.81.0
+              - requests>=2.32.0
+      tasks:
+        - task_key: ingest_destination_context
+          environment_key: tripwise_python
+          max_retries: 0
+          spark_python_task:
+            python_file: ./jobs/tripwise_pipeline.py
+            parameters:
+              - --stage
+              - ingest
+              - --catalog
+              - workspace
+              - --schema
+              - default
+        - task_key: vectorize_context
+          environment_key: tripwise_python
+          max_retries: 0
+          depends_on:
+            - task_key: ingest_destination_context
+          spark_python_task:
+            python_file: ./jobs/tripwise_pipeline.py
+            parameters:
+              - --stage
+              - vectorize
+              - --catalog
+              - workspace
+              - --schema
+              - default
+              - --lakebase-endpoint
+              - ${var.lakebase_endpoint}
+              - --pipeline-api-url
+              - ${var.pipeline_api_url}
+              - --pipeline-oauth-client-id
+              - ${var.pipeline_oauth_client_id}
+              - --pipeline-oauth-secret-scope
+              - ${var.pipeline_oauth_secret_scope}
+              - --pipeline-oauth-secret-key
+              - ${var.pipeline_oauth_secret_key}
+
+targets:
+  default:
+    default: true
+    workspace:
+      host: https://dbc-a2b59cb4-753d.cloud.databricks.com
+    variables:
+      postgres_branch: projects/databricks-ai-bootcamp/branches/production
+      postgres_database: projects/databricks-ai-bootcamp/branches/production/databases/databricks-postgres
+      lakebase_endpoint: projects/databricks-ai-bootcamp/branches/production/endpoints/primary
+      pipeline_api_url: https://tripwise-capstone-7474646632333305.aws.databricksapps.com
+      pipeline_oauth_client_id: 674108cd-429b-4ad0-9ed1-30cae2727f14
+      pipeline_oauth_secret_scope: tripwise-agent-secrets
+      pipeline_oauth_secret_key: agent-oauth-client-secret

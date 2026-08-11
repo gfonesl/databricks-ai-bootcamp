@@ -1,0 +1,10 @@
+command:
+  - sh
+  - -c
+  - uvicorn app:app --host 0.0.0.0 --port ${DATABRICKS_APP_PORT:-8000}
+env:
+  - name: LAKEBASE_ENDPOINT
+    valueFrom: postgres
+  - name: TRIPWISE_HTTP_USER_AGENT
+    value: tripwise-capstone/1.0
+
