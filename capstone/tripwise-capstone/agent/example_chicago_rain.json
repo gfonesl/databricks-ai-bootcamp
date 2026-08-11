@@ -1,0 +1,8 @@
+{
+  "question": "Vai chover em Chicago amanhã?",
+  "guidelines": [
+    "Use search_destination_context before answering.",
+    "State the destination, date coverage, source context and uncertainty.",
+    "Do not invent a forecast when no relevant context is returned."
+  ]
+}

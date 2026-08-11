@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tripwise · AI Travel Planner</title><link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <main>
+    <header class="hero"><div><p class="eyebrow">Databricks AI Bootcamp · Capstone</p><h1>Tripwise</h1><p class="lede">A weather-aware travel planner built on Lakebase, Spark context pipelines and pgvector retrieval.</p></div><button id="new-trip" class="primary">+ New trip</button></header>
+    <p id="notice" class="notice" hidden></p>
+    <section id="new-trip-panel" class="panel form-panel" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Start planning</p><h2>Create a trip</h2></div><button class="ghost close-panel">Close</button></div>
+      <form id="trip-form" class="form-grid"><label>Your name<input name="display_name" placeholder="Gabriel" required minlength="2"></label><label>Trip title<input name="title" placeholder="Rio outdoor weekend" required minlength="3"></label><label>Start date<input name="start_date" type="date" required></label><label>End date<input name="end_date" type="date" required></label><label class="span-two">Interests (comma separated)<input name="interests" placeholder="food, museums, walking"></label><label class="span-two">Notes<textarea name="notes" placeholder="Preferences, accessibility needs, or planning goals."></textarea></label><div class="span-two actions"><button class="primary" type="submit">Create trip</button></div></form>
+    </section>
+    <section class="kpis" aria-label="Trip overview"><article><span>Trips</span><strong id="trip-count">—</strong><small>Source: Lakebase</small></article><article><span>Destinations</span><strong id="destination-count">—</strong><small>Across saved trips</small></article><article><span>Itinerary items</span><strong id="itinerary-count">—</strong><small>Persisted actions</small></article><article><span>Context source</span><strong>Live</strong><small>Open-Meteo + Wikimedia</small></article></section>
+    <section class="workspace"><aside class="panel trips-panel"><div class="section-heading"><div><p class="eyebrow">Operational data</p><h2>Your trips</h2></div><button id="refresh" class="ghost">Refresh</button></div><div id="trip-list" class="list"><p class="empty">Loading trips from Lakebase…</p></div></aside>
+      <section id="detail" class="panel detail"><div class="empty"><h2>Select a trip</h2><p>Create a trip or select one from Lakebase to view itinerary, weather and packing recommendations.</p></div></section>
+    </section>
+    <section class="panel context-panel"><div class="section-heading"><div><p class="eyebrow">Semantic retrieval</p><h2>Search destination context</h2><p>Retrieves weather narratives and Wikimedia descriptions from Lakebase pgvector.</p></div></div><form id="search-form" class="search-row"><input id="context-query" required minlength="2" value="outdoor activities with lower rain risk" aria-label="Destination context query"><button class="primary">Search context</button></form><div id="search-results" class="results empty">Search uses the context prepared by the Spark job.</div></section>
+  </main>
+  <template id="detail-template"><div class="section-heading"><div><p class="eyebrow">Trip workspace</p><h2 class="trip-title"></h2><p class="trip-meta"></p></div><button class="ghost sync-weather">Refresh weather</button></div><section class="tabs"><button class="tab active" data-tab="overview">Overview</button><button class="tab" data-tab="itinerary">Itinerary</button><button class="tab" data-tab="packing">Packing list</button></section><div class="tab-content overview"></div><div class="tab-content itinerary" hidden></div><div class="tab-content packing" hidden></div></template>
+  <script src="/static/app.js"></script>
+</body></html>
+
