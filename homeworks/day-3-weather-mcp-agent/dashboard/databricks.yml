@@ -1,5 +1,5 @@
 bundle:
-  name: day2-weather-intelligence
+  name: day3-weather-dashboard
 
 variables:
   postgres_branch:
@@ -10,8 +10,8 @@ variables:
 resources:
   apps:
     app:
-      name: day2-weather-intelligence
-      description: Weather Intelligence REST API backed by Lakebase pgvector.
+      name: day3-weather-dashboard
+      description: Dashboard of non-sensitive Weather MCP tool activity.
       source_code_path: ./
       resources:
         - name: postgres

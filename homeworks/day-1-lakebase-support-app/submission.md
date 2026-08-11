@@ -2,7 +2,7 @@
 
 ## App URL
 
-https://day1-support-app-7474646632333305.aws.databricksapps.com
+Deployment URL intentionally omitted from this public source repository.
 
 ## Evidence checklist
 

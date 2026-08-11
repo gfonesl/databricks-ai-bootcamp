@@ -2,9 +2,9 @@
 
 ## Project links
 
-- Databricks App: https://tripwise-capstone-7474646632333305.aws.databricksapps.com
-- Supervisor Agent: **Tripwise Travel Agent** (`mas-2c74d8ec-endpoint`)
-- Source repository: https://github.com/gfonesl/databricks-ai-bootcamp
+- Databricks App: deployment URL intentionally omitted from this public source repository.
+- Supervisor Agent: **Tripwise Travel Agent** (deployment-specific endpoint intentionally omitted).
+- Source repository: this repository.
 
 ## Delivered components
 

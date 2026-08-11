@@ -1,0 +1,9 @@
+command:
+  - sh
+  - -c
+  - uvicorn mcp_app:app --host 0.0.0.0 --port ${DATABRICKS_APP_PORT}
+env:
+  - name: LAKEBASE_ENDPOINT
+    valueFrom: postgres
+  - name: WEATHER_HTTP_USER_AGENT
+    value: weather-mcp-bootcamp/1.0

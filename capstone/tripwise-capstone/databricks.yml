@@ -85,13 +85,3 @@ resources:
 targets:
   default:
     default: true
-    workspace:
-      host: https://dbc-a2b59cb4-753d.cloud.databricks.com
-    variables:
-      postgres_branch: projects/databricks-ai-bootcamp/branches/production
-      postgres_database: projects/databricks-ai-bootcamp/branches/production/databases/databricks-postgres
-      lakebase_endpoint: projects/databricks-ai-bootcamp/branches/production/endpoints/primary
-      pipeline_api_url: https://tripwise-capstone-7474646632333305.aws.databricksapps.com
-      pipeline_oauth_client_id: 674108cd-429b-4ad0-9ed1-30cae2727f14
-      pipeline_oauth_secret_scope: tripwise-agent-secrets
-      pipeline_oauth_secret_key: agent-oauth-client-secret

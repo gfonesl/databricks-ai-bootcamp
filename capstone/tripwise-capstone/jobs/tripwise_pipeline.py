@@ -131,7 +131,9 @@ def vectorize(spark: SparkSession, args: argparse.Namespace) -> None:
             "chunks": [{"text": chunk} for chunk in chunks],
         })
     client_secret = DBUtils(spark).secrets.get(args.pipeline_oauth_secret_scope, args.pipeline_oauth_secret_key)
-    workspace_host = os.environ.get("DATABRICKS_HOST", "https://dbc-a2b59cb4-753d.cloud.databricks.com")
+    workspace_host = os.environ.get("DATABRICKS_HOST")
+    if not workspace_host:
+        raise RuntimeError("DATABRICKS_HOST must be available in the Job environment for OAuth token exchange.")
     token_response = requests.post(
         workspace_host.rstrip("/") + "/oidc/v1/token",
         data={"grant_type": "client_credentials", "scope": "all-apis"},

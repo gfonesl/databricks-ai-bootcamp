@@ -216,3 +216,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local Databricks and AI development tooling
+.agents/
+.ai-dev-kit/
+.databricks/
+databricks.local.yml
+
+# Local test artifacts and submission packages
+pytest-cache-files-*/
+*-submission.zip
+*-submission-*.zip

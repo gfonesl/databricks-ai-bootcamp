@@ -1,0 +1,6 @@
+{
+  "question": "Vai chover em Chicago amanhã?",
+  "guidelines": [
+    "Use the Weather MCP forecast tool for Chicago and the relevant date before answering."
+  ]
+}
