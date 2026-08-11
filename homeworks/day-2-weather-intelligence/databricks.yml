@@ -23,8 +23,3 @@ resources:
 targets:
   default:
     default: true
-    workspace:
-      host: https://dbc-a2b59cb4-753d.cloud.databricks.com
-    variables:
-      postgres_branch: projects/databricks-ai-bootcamp/branches/production
-      postgres_database: projects/databricks-ai-bootcamp/branches/production/databases/databricks-postgres

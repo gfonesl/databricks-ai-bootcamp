@@ -1,5 +1,5 @@
 {
-  "warehouse_id": "41cf7d840a18bdc9",
+  "warehouse_id": "<SQL_WAREHOUSE_ID>",
   "wait_timeout": "50s",
   "statement": "SELECT http_request(conn => 'tripwise_mcp_connection', method => 'POST', path => '/', headers => map('Accept', 'application/json, text/event-stream'), json => '{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":1}').text AS response"
 }
