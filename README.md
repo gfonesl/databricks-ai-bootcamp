@@ -22,6 +22,7 @@ flowchart LR
 | --- | --- | --- |
 | [Day 1 — Support Operations](homeworks/day-1-lakebase-support-app/README.md) | Transactional CRUD with relationships, validation, filtering, statistics, and persistence. | React, AppKit, Express, Lakebase |
 | [Day 2 — Weather Intelligence](homeworks/day-2-weather-intelligence/README_WEATHER.md) | Ingesting public weather narratives, content-aware upserts, embeddings, and semantic search. | Flask, NWS, psycopg2, pgvector |
+| [Day 3 — Weather MCP Agent](homeworks/day-3-weather-mcp-agent/README_DAY3.md) | A Streamable HTTP MCP server, deterministic travel guidance, and Lakebase telemetry for agent tool calls. | FastMCP, FastAPI, Flask, Open-Meteo, Lakebase |
 | [Tripwise — Capstone](capstone/tripwise-capstone/README.md) | A full data-and-agent application: Spark/Delta pipeline, operational App, semantic retrieval, and MCP write tools. | FastAPI, Spark, Delta, Lakebase, pgvector, FastMCP |
 
 ## Engineering principles

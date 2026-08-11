@@ -1,0 +1,6 @@
+{
+  "question": "Qual é a previsão dos próximos três dias em Nova York?",
+  "guidelines": [
+    "Use the Weather MCP multi-day forecast tool with days=3 before answering."
+  ]
+}

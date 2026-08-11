@@ -1,0 +1,8 @@
+{
+  "access_control_list": [
+    {
+      "service_principal_name": "<MCP_APP_SERVICE_PRINCIPAL_CLIENT_ID>",
+      "permission_level": "CAN_USE"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Weather MCP activity</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, system-ui, sans-serif; }
+    body { margin: 0; background: #101114; color: #f6f7f9; } main { max-width: 1120px; margin: auto; padding: 42px 24px 64px; }
+    .eyebrow { color: #8db4ff; font-size: .8rem; letter-spacing: .1em; font-weight: 700; text-transform: uppercase; } h1 { margin: 8px 0; font-size: clamp(2rem, 5vw, 3.4rem); }
+    p { color: #c7ccd5; line-height: 1.5; } .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 26px 0; } .card, section { border: 1px solid #323640; border-radius: 14px; background: #191b20; padding: 18px; } .metric { font-size: 2.2rem; margin: 8px 0; } .alert { border-color: #bc613b; color: #ffc5ae; } table { width: 100%; border-collapse: collapse; font-size: .9rem; } th, td { text-align: left; padding: 12px 9px; border-bottom: 1px solid #30333a; vertical-align: top; } th { color: #b9d5ff; } .success { color: #8de0ac; } .error { color: #ffad9c; } button { float: right; margin-top: -48px; border: 0; padding: 10px 14px; border-radius: 8px; background: #3d7eff; color: white; font-weight: 700; cursor: pointer; } @media(max-width: 720px){ .grid{grid-template-columns: 1fr;} table{font-size:.78rem;} }
+  </style>
+</head>
+<body><main>
+  <div class="eyebrow">Databricks AI Bootcamp · Day 3</div><h1>Weather MCP activity</h1>
+  <p>Operational log of weather tools called through the MCP server. This dashboard does not store user chat transcripts.</p><button onclick="location.reload()">Refresh</button>
+  {% if error %}<p class="card alert">{{ error }}</p>{% endif %}
+  <div class="grid"><div class="card"><div>Total calls</div><div class="metric">{{ data.overview.total_calls }}</div></div><div class="card"><div>Failures</div><div class="metric">{{ data.overview.failures }}</div></div><div class="card"><div>Last hour</div><div class="metric">{{ data.overview.last_hour_calls }}</div></div></div>
+  <section><h2>Recent tool calls</h2>{% if data.activity %}<table><thead><tr><th>When</th><th>Tool</th><th>Location</th><th>Result</th><th>Summary</th></tr></thead><tbody>{% for row in data.activity %}<tr><td>{{ row.created_at }}</td><td>{{ row.tool_name }}</td><td>{{ row.location or '—' }}</td><td class="{{ row.outcome }}">{{ row.outcome }}</td><td>{{ row.summary }}</td></tr>{% endfor %}</tbody></table>{% else %}<p>No MCP tool activity has been recorded yet.</p>{% endif %}</section>
+</main></body></html>
