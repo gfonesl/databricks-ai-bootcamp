@@ -27,7 +27,9 @@ class FakeActivity:
 
 class FailingWeather:
     def get_current_weather(self, location):
-        raise WeatherProviderError("The weather provider is temporarily unavailable. Please try again.")
+        raise WeatherProviderError(
+            "The weather provider is temporarily unavailable. Please try again."
+        )
 
 
 class McpToolTests(unittest.TestCase):
@@ -45,8 +47,14 @@ class McpToolTests(unittest.TestCase):
     def test_tools_delegate_and_log_success(self):
         self.assertEqual(mcp_app.current_weather_tool("Chicago")["temperature_c"], 20)
         self.assertEqual(len(mcp_app.weather_forecast_tool("Austin", 2)["forecast"]), 2)
-        self.assertIn("umbrella", mcp_app.travel_recommendation_tool("Austin", "2026-08-10")["recommendation"][0].lower())
-        self.assertEqual([event["tool_name"] for event in self.activity.events], ["get_current_weather", "get_weather_forecast", "get_travel_recommendation"])
+        self.assertIn(
+            "umbrella",
+            mcp_app.travel_recommendation_tool("Austin", "2026-08-10")["recommendation"][0].lower(),
+        )
+        self.assertEqual(
+            [event["tool_name"] for event in self.activity.events],
+            ["get_current_weather", "get_weather_forecast", "get_travel_recommendation"],
+        )
 
     def test_provider_failure_returns_a_clean_tool_error_and_is_logged(self):
         mcp_app.weather = FailingWeather()

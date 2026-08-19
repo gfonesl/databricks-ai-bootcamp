@@ -28,14 +28,28 @@ def lakebase_connection():
     if any(not os.getenv(key) for key in required):
         raise LakebaseError("Lakebase is not configured for this dashboard.")
     try:
-        token = _workspace_client().postgres.generate_database_credential(endpoint=os.environ["LAKEBASE_ENDPOINT"]).token
-        connection = psycopg2.connect(host=os.environ["PGHOST"], dbname=os.environ["PGDATABASE"], user=os.environ["PGUSER"], password=token, port=os.getenv("PGPORT", "5432"), sslmode="require", connect_timeout=15)
+        token = (
+            _workspace_client()
+            .postgres.generate_database_credential(endpoint=os.environ["LAKEBASE_ENDPOINT"])
+            .token
+        )
+        connection = psycopg2.connect(
+            host=os.environ["PGHOST"],
+            dbname=os.environ["PGDATABASE"],
+            user=os.environ["PGUSER"],
+            password=token,
+            port=os.getenv("PGPORT", "5432"),
+            sslmode="require",
+            connect_timeout=15,
+        )
         yield connection
         connection.commit()
     except Exception as error:
         if connection:
             connection.rollback()
-        raise LakebaseError("The dashboard cannot read MCP activity yet. Confirm its Lakebase grants.") from error
+        raise LakebaseError(
+            "The dashboard cannot read MCP activity yet. Confirm its Lakebase grants."
+        ) from error
     finally:
         if connection:
             connection.close()
@@ -67,6 +81,11 @@ class DashboardRepository:
                 for row in cursor.fetchall():
                     record = dict(row)
                     record["created_at"] = record["created_at"].isoformat()
-                    record["requested_date"] = record["requested_date"].isoformat() if record["requested_date"] else None
+                    record["requested_date"] = (
+                        record["requested_date"].isoformat() if record["requested_date"] else None
+                    )
                     activity.append(record)
-                return {"overview": {key: int(value) for key, value in overview.items()}, "activity": activity}
+                return {
+                    "overview": {key: int(value) for key, value in overview.items()},
+                    "activity": activity,
+                }

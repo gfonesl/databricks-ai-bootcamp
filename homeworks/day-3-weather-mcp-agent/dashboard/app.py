@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 
 from flask import Flask, jsonify, render_template
-
 from lakebase import DashboardRepository, LakebaseError
 
 
@@ -27,7 +26,14 @@ def create_app(repository: DashboardRepository | None = None) -> Flask:
         try:
             return render_template("index.html", data=repo.overview(), error=None)
         except LakebaseError as error:
-            return render_template("index.html", data={"overview": {"total_calls": 0, "failures": 0, "last_hour_calls": 0}, "activity": []}, error=str(error))
+            return render_template(
+                "index.html",
+                data={
+                    "overview": {"total_calls": 0, "failures": 0, "last_hour_calls": 0},
+                    "activity": [],
+                },
+                error=str(error),
+            )
 
     return app
 

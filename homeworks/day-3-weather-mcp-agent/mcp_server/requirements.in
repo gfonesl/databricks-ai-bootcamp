@@ -1,0 +1,7 @@
+fastapi==0.141.1
+uvicorn[standard]==0.52.3
+fastmcp==3.4.7
+starlette==1.6.0
+requests==2.34.2
+psycopg2-binary==2.9.10
+databricks-sdk==0.104.0

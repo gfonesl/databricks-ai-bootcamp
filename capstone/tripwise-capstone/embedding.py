@@ -3,7 +3,13 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Iterable
 
-from config import CHUNK_OVERLAP, CHUNK_SIZE, EMBEDDING_DIMENSIONS, EMBEDDING_MODEL
+from config import (
+    CHUNK_OVERLAP,
+    CHUNK_SIZE,
+    EMBEDDING_DIMENSIONS,
+    EMBEDDING_MODEL,
+    EMBEDDING_MODEL_REVISION,
+)
 
 
 class EmbeddingError(RuntimeError):
@@ -16,7 +22,7 @@ def get_embedding_model():
     try:
         from sentence_transformers import SentenceTransformer
 
-        return SentenceTransformer(EMBEDDING_MODEL)
+        return SentenceTransformer(EMBEDDING_MODEL, revision=EMBEDDING_MODEL_REVISION)
     except Exception as error:  # pragma: no cover - depends on runtime image/network
         raise EmbeddingError("Unable to load the Tripwise embedding model.") from error
 
@@ -64,4 +70,3 @@ def embed_texts(texts: Iterable[str], model=None) -> list[list[float]]:
 
 def vector_literal(vector: Iterable[float]) -> str:
     return "[" + ",".join(format(float(value), ".10g") for value in vector) + "]"
-

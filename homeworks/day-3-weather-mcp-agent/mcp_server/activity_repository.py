@@ -5,9 +5,8 @@ from contextlib import contextmanager
 from functools import lru_cache
 
 import psycopg2
-from databricks.sdk import WorkspaceClient
-
 from config import ACTIVITY_TABLE, SCHEMA
+from databricks.sdk import WorkspaceClient
 
 
 class LakebaseError(RuntimeError):
@@ -19,7 +18,14 @@ def _settings() -> dict[str, str]:
     missing = [name for name in required if not os.getenv(name)]
     if missing:
         raise LakebaseError("Lakebase is not configured for this App.")
-    return {"host": os.environ["PGHOST"], "dbname": os.environ["PGDATABASE"], "user": os.environ["PGUSER"], "port": os.getenv("PGPORT", "5432"), "sslmode": "require", "connect_timeout": "15"}
+    return {
+        "host": os.environ["PGHOST"],
+        "dbname": os.environ["PGDATABASE"],
+        "user": os.environ["PGUSER"],
+        "port": os.getenv("PGPORT", "5432"),
+        "sslmode": "require",
+        "connect_timeout": "15",
+    }
 
 
 @lru_cache(maxsize=1)
@@ -31,7 +37,11 @@ def _workspace_client() -> WorkspaceClient:
 def lakebase_connection():
     connection = None
     try:
-        token = _workspace_client().postgres.generate_database_credential(endpoint=os.environ["LAKEBASE_ENDPOINT"]).token
+        token = (
+            _workspace_client()
+            .postgres.generate_database_credential(endpoint=os.environ["LAKEBASE_ENDPOINT"])
+            .token
+        )
         connection = psycopg2.connect(password=token, **_settings())
         yield connection
         connection.commit()
@@ -65,10 +75,23 @@ class ActivityRepository:
                     )
                     """
                 )
-                cursor.execute(f"CREATE INDEX IF NOT EXISTS idx_mcp_activity_recent ON {ACTIVITY_TABLE} (created_at DESC)")
-                cursor.execute(f"CREATE INDEX IF NOT EXISTS idx_mcp_activity_tool_outcome ON {ACTIVITY_TABLE} (tool_name, outcome, created_at DESC)")
+                cursor.execute(
+                    f"CREATE INDEX IF NOT EXISTS idx_mcp_activity_recent ON {ACTIVITY_TABLE} (created_at DESC)"
+                )
+                cursor.execute(
+                    f"CREATE INDEX IF NOT EXISTS idx_mcp_activity_tool_outcome ON {ACTIVITY_TABLE} (tool_name, outcome, created_at DESC)"
+                )
 
-    def log(self, *, tool_name: str, location: str | None, requested_date: str | None, forecast_days: int | None, outcome: str, summary: str) -> None:
+    def log(
+        self,
+        *,
+        tool_name: str,
+        location: str | None,
+        requested_date: str | None,
+        forecast_days: int | None,
+        outcome: str,
+        summary: str,
+    ) -> None:
         with lakebase_connection() as connection:
             with connection.cursor() as cursor:
                 cursor.execute(

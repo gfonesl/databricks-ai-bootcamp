@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from weather_adapter import OpenMeteoWeatherAdapter, WeatherProviderError
+from weather_adapter import OpenMeteoWeatherAdapter
 
 
 class FakeResponse:
@@ -21,8 +21,40 @@ class FakeSession:
 
     def get(self, url, params, timeout):
         if "geocoding" in url:
-            return FakeResponse({"results": [{"name": "Chicago", "country": "United States", "latitude": 41.88, "longitude": -87.63, "timezone": "America/Chicago"}]})
-        return FakeResponse({"current": {"time": "2026-08-10T10:00", "temperature_2m": 22, "apparent_temperature": 21, "relative_humidity_2m": 52, "weather_code": 2, "wind_speed_10m": 13}, "daily": {"time": ["2026-08-10", "2026-08-11"], "weather_code": [61, 0], "temperature_2m_max": [31, 22], "temperature_2m_min": [14, 12], "precipitation_probability_max": [55, 5], "rain_sum": [4.2, 0], "wind_speed_10m_max": [45, 10]}})
+            return FakeResponse(
+                {
+                    "results": [
+                        {
+                            "name": "Chicago",
+                            "country": "United States",
+                            "latitude": 41.88,
+                            "longitude": -87.63,
+                            "timezone": "America/Chicago",
+                        }
+                    ]
+                }
+            )
+        return FakeResponse(
+            {
+                "current": {
+                    "time": "2026-08-10T10:00",
+                    "temperature_2m": 22,
+                    "apparent_temperature": 21,
+                    "relative_humidity_2m": 52,
+                    "weather_code": 2,
+                    "wind_speed_10m": 13,
+                },
+                "daily": {
+                    "time": ["2026-08-10", "2026-08-11"],
+                    "weather_code": [61, 0],
+                    "temperature_2m_max": [31, 22],
+                    "temperature_2m_min": [14, 12],
+                    "precipitation_probability_max": [55, 5],
+                    "rain_sum": [4.2, 0],
+                    "wind_speed_10m_max": [45, 10],
+                },
+            }
+        )
 
 
 class WeatherAdapterTests(unittest.TestCase):

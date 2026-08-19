@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Iterable
 
-from config import CHUNK_OVERLAP, CHUNK_SIZE, EMBEDDING_MODEL
+from config import CHUNK_OVERLAP, CHUNK_SIZE, EMBEDDING_MODEL, EMBEDDING_MODEL_REVISION
 
 
 class EmbeddingError(RuntimeError):
@@ -16,7 +16,7 @@ def get_embedding_model():
     try:
         from sentence_transformers import SentenceTransformer
 
-        return SentenceTransformer(EMBEDDING_MODEL)
+        return SentenceTransformer(EMBEDDING_MODEL, revision=EMBEDDING_MODEL_REVISION)
     except Exception as error:  # pragma: no cover - depends on the runtime model cache
         raise EmbeddingError(
             "Unable to load the embedding model. Verify outbound access to Hugging Face "

@@ -1,8 +1,8 @@
-# Homework 2 — Weather Intelligence
+# Weather Intelligence
 
-Uma Databricks App Flask que transforma alertas e previsões narrativas do National Weather Service (NWS) em documentos recuperáveis no Lakebase Postgres com pgvector.
+A Flask Databricks App that turns National Weather Service (NWS) alerts and forecast narratives into searchable Lakebase PostgreSQL documents backed by pgvector.
 
-## Arquitetura
+## Architecture
 
 ```text
 NWS alerts + forecast narratives
@@ -18,33 +18,33 @@ weather_intelligence.weather_embeddings (vector(384), HNSW)
       POST /weather/search
 ```
 
-A geocodificação de `Chicago, IL` e `Austin, TX` usa Nominatim apenas para encontrar latitude/longitude. Os documentos recuperados — alertas e previsões — vêm exclusivamente do NWS.
+Nominatim resolves latitude and longitude for locations such as `Chicago, IL` and `Austin, TX`. All retrieved alerts and forecast narratives come from the NWS.
 
 ## Lakebase schema
 
-O startup da Databricks App cria o schema exclusivo `weather_intelligence`, de propriedade da service principal da App:
+At startup, the Databricks App creates its dedicated `weather_intelligence` schema:
 
-- `weather_documents`: documento NWS normalizado, localização, tipo (`alert`/`forecast`), texto, timestamps, payload JSONB e `content_hash` para upsert idempotente.
-- `weather_embeddings`: chunks e vetores `vector(384)` do modelo `sentence-transformers/all-MiniLM-L6-v2`. A chave estrangeira `document_id` referencia `weather_documents(id)` com `ON DELETE CASCADE`.
-- Índice HNSW: `idx_weather_embeddings_hnsw` usando `vector_cosine_ops` para busca por similaridade de cosseno.
+- `weather_documents` stores normalized NWS provenance, location, source type (`alert` or `forecast`), text, timestamps, JSONB payload, and a `content_hash` used for idempotent upserts.
+- `weather_embeddings` stores text chunks and `vector(384)` embeddings. Its `document_id` foreign key uses `ON DELETE CASCADE`.
+- `idx_weather_embeddings_hnsw` provides cosine similarity search with `vector_cosine_ops`.
 
-O projeto Lakebase usa pgvector para a coluna `vector(384)`. Antes do primeiro deploy, uma identidade com privilégio administrativo no banco deve executar, uma única vez:
+Before the first deployment, a database administrator must enable pgvector once:
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
 ```
 
-A App não executa essa operação de nível de banco: sua service principal é proprietária apenas do schema `weather_intelligence`. Ela não guarda senhas; o `databricks-sdk` gera tokens OAuth temporários para cada nova conexão `psycopg2`.
+The App owns only its schema and does not perform database-level extension management. `databricks-sdk` generates temporary OAuth credentials for new psycopg2 connections; no database password is stored in the repository.
 
 ## API
 
-### Health
+Liveness:
 
 ```http
 GET /healthz
 ```
 
-### Sincronizar documentos meteorológicos
+Collect weather documents:
 
 ```http
 POST /weather/sync
@@ -56,9 +56,9 @@ Content-Type: application/json
 }
 ```
 
-A resposta mantém avisos por localização quando uma fonte externa falha, sem descartar os documentos já coletados das demais localizações. O endpoint aceita até 50 documentos por chamada.
+The response reports per-location warnings without discarding successfully collected locations. A request accepts at most 50 documents.
 
-### Buscar semanticamente
+Semantic search:
 
 ```http
 POST /weather/search
@@ -70,46 +70,51 @@ Content-Type: application/json
 }
 ```
 
-`top_k` deve estar entre 1 e 20. A resposta devolve localização, tipo, headline, trecho recuperado, data efetiva e similaridade. Antes da primeira busca, execute sync e a geração de embeddings.
+`top_k` must be between 1 and 20. Results include location, source type, headline, retrieved passage, effective date, and similarity. Synchronize documents and generate embeddings before the first search.
 
-## Chunking e embeddings
+## Chunking and embeddings
 
-O script divide `headline + narrative_text` em janelas de 800 caracteres, com sobreposição de 100, tentando respeitar limites de palavras. Apenas documentos novos ou cujo `content_hash` mudou são processados; seus chunks anteriores são substituídos na mesma transação.
+The ingestion script combines the headline and narrative, then creates 800-character windows with 100-character overlap while attempting to preserve word boundaries. Only new documents or documents whose content hash changed are processed; previous chunks are replaced transactionally.
+
+The runtime is pinned to `sentence-transformers==5.7.0`, and `all-MiniLM-L6-v2` is loaded at immutable revision `1110a243fdf4706b3f48f1d95db1a4f5529b4d41`.
 
 ```bash
 python scripts/ingest_weather_embeddings.py --limit 100
 ```
 
-Execute o script depois do primeiro deploy da App, em compute Databricks (ou em um ambiente que receba credenciais temporárias). Ele não executa DDL: a App é a única proprietária e inicializadora do schema. Defina `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGSSLMODE=require` e `LAKEBASE_ENDPOINT` somente na sessão de execução, com `DATABRICKS_CONFIG_PROFILE=BOOTCAMP` para a identidade local gerar credenciais temporárias. Use `.env.example` como lista de nomes de variáveis, nunca como local para segredos reais. A Databricks App recebe `PGHOST`, `PGDATABASE`, `PGUSER`, `PGPORT`, `PGSSLMODE` e o endpoint pelo recurso Lakebase `postgres` definido em `app.yaml` e `databricks.yml`. Em cada conexão, o `databricks-sdk` gera uma credencial OAuth temporária para a identidade da App; nenhuma senha permanente é configurada.
+Run the script on Databricks compute, or in an environment that can receive temporary Lakebase credentials. Use `.env.example` only as a variable-name reference and never store real secrets in it.
 
-## Desenvolvimento e testes
+## Development and tests
 
-```bash
-python -m unittest discover -s tests -v
-```
-
-Os testes são locais e usam falsos repositórios/clientes para não exigir Lakebase, NWS ou o download do modelo.
-
-## Deploy
-
-Com o perfil `BOOTCAMP` configurado, no diretório desta App:
+Install the fully pinned runtime graph and run the isolated suite:
 
 ```bash
-databricks bundle validate -p BOOTCAMP
-databricks bundle deploy -p BOOTCAMP
-databricks apps deploy day2-weather-intelligence -p BOOTCAMP
+python -m pip install --require-hashes -r requirements.txt
+python -m pytest tests -q
 ```
 
-O comando de deploy pode variar conforme a versão do CLI; valide primeiro a sintaxe disponível em `databricks apps deploy --help`. No primeiro deploy, a service principal da App cria e passa a possuir `weather_intelligence`.
+Tests use fake repositories and source clients, so they do not require Lakebase, NWS access, or an embedding-model download.
 
-## Limitações desta versão
+## Deployment
 
-- NWS, Nominatim e o download inicial do modelo exigem rede externa.
-- Os embeddings são gerados manualmente; um Job agendado é um próximo passo natural.
-- A API oferece recuperação semântica, não uma resposta gerada por LLM.
-- CDF e `REPLICA IDENTITY FULL` não são necessários: pgvector consulta diretamente o Lakebase.
+Supply your own non-secret Lakebase resource names:
 
-## Fontes
+```bash
+databricks bundle validate --strict \
+  --var postgres_branch=<LAKEBASE_BRANCH> \
+  --var postgres_database=<LAKEBASE_DATABASE>
+```
+
+Deployment is intentionally separate from local CI and requires an authenticated Databricks workspace.
+
+## Limitations
+
+- NWS, Nominatim, and the first embedding-model download require external network access.
+- Embedding generation is manually triggered; a scheduled job is the natural next operational step.
+- The API performs retrieval, not LLM answer generation.
+- Weather data can change or be temporarily unavailable and must not replace official safety guidance.
+
+## Sources
 
 - [National Weather Service API](https://www.weather.gov/documentation/services-web-api)
 - [Nominatim usage policy](https://operations.osmfoundation.org/policies/nominatim/)

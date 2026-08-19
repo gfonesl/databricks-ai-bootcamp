@@ -23,10 +23,59 @@
                 "origin": "user"
               }
             }
+          },
+          {
+            "type": "experiment",
+            "alias": "MLflow experiment for agent traces",
+            "resourceKey": "agents-mlflow-experiment",
+            "description": "When bound, agent turns and tool calls are traced to this MLflow experiment via OpenTelemetry. Tracing is a no-op when unset.",
+            "permission": "CAN_EDIT",
+            "fields": {
+              "experimentId": {
+                "env": "MLFLOW_EXPERIMENT_ID",
+                "description": "MLflow experiment id traces are logged to",
+                "origin": "user"
+              }
+            }
           }
         ]
       },
       "stability": "beta"
+    },
+    "aiSearch": {
+      "name": "aiSearch",
+      "displayName": "AI Search Plugin",
+      "description": "Query Databricks Vector Search indexes with built-in hybrid search, reranking, and pagination",
+      "package": "@databricks/appkit",
+      "resources": {
+        "required": [
+          {
+            "type": "vector_search_index",
+            "alias": "Vector Search Index",
+            "resourceKey": "vector-search-index",
+            "description": "A Databricks Vector Search index to query. Index names configured via plugin config.",
+            "permission": "SELECT",
+            "fields": {
+              "id": {
+                "env": "DATABRICKS_VS_INDEX_NAME",
+                "description": "Three-level UC name of the default index (catalog.schema.index_name)",
+                "origin": "user"
+              }
+            }
+          }
+        ],
+        "optional": []
+      },
+      "stability": "beta",
+      "scaffolding": {
+        "rules": {
+          "must": [
+            "List the vector search index's source-table columns (unity-catalog tables API) so the user can pick which to return",
+            "Ask the user which of those columns the search should return",
+            "Write aiSearch({ indexes: { default: { columns: [...] } } }) in the server file; the client queries the 'default' alias"
+          ]
+        }
+      }
     },
     "analytics": {
       "name": "analytics",
@@ -58,12 +107,8 @@
       },
       "scaffolding": {
         "rules": {
-          "must": [
-            "Before init, ensure the SQL Warehouse passed via --set analytics.sql-warehouse.id is running"
-          ],
-          "should": [
-            "After init, ensure config/queries/ has at least one .sql file before running npm run typegen"
-          ]
+          "must": ["Before init, ensure the SQL Warehouse passed via --set analytics.sql-warehouse.id is running"],
+          "should": ["After init, ensure config/queries/ has at least one .sql file before running npm run typegen"]
         }
       }
     },
@@ -98,9 +143,7 @@
       },
       "scaffolding": {
         "rules": {
-          "must": [
-            "Before init, verify your Unity Catalog volume exists and you have WRITE_VOLUME permission"
-          ]
+          "must": ["Before init, verify your Unity Catalog volume exists and you have WRITE_VOLUME permission"]
         }
       }
     },
@@ -138,9 +181,7 @@
       },
       "scaffolding": {
         "rules": {
-          "must": [
-            "After init, configure the 'spaces' map in plugin config with alias-to-Space-ID mappings"
-          ]
+          "must": ["After init, configure the 'spaces' map in plugin config with alias-to-Space-ID mappings"]
         }
       }
     },
@@ -185,9 +226,7 @@
             "fields": {
               "project": {
                 "description": "Full Lakebase Postgres project resource name. Obtain by running `databricks postgres list-projects`, select the desired item from the output array and use its .name value.",
-                "examples": [
-                  "projects/{project-id}"
-                ],
+                "examples": ["projects/{project-id}"],
                 "discovery": {
                   "type": "kind",
                   "resourceKind": "postgres_project",
@@ -197,9 +236,7 @@
               },
               "branch": {
                 "description": "Full Lakebase Postgres branch resource name. Obtain by running `databricks postgres list-branches {project-name}`, select the desired item from the output array and use its .name value. Requires the project resource name.",
-                "examples": [
-                  "projects/{project-id}/branches/{branch-id}"
-                ],
+                "examples": ["projects/{project-id}/branches/{branch-id}"],
                 "discovery": {
                   "type": "kind",
                   "resourceKind": "postgres_branch",
@@ -210,9 +247,7 @@
               },
               "database": {
                 "description": "Full Lakebase Postgres database resource name. Obtain by running `databricks postgres list-databases {branch-name}`, select the desired item from the output array and use its .name value. Requires the branch resource name.",
-                "examples": [
-                  "projects/{project-id}/branches/{branch-id}/databases/{database-id}"
-                ],
+                "examples": ["projects/{project-id}/branches/{branch-id}/databases/{database-id}"],
                 "discovery": {
                   "type": "kind",
                   "resourceKind": "postgres_database",
@@ -239,9 +274,7 @@
                 "env": "LAKEBASE_ENDPOINT",
                 "description": "Lakebase endpoint resource name. Auto-injected at runtime via app.yaml valueFrom: postgres. For local development, obtain by running `databricks postgres list-endpoints {branch-name}`, select the desired item from the output array and use its .name value.",
                 "bundleIgnore": true,
-                "examples": [
-                  "projects/{project-id}/branches/{branch-id}/endpoints/{endpoint-id}"
-                ],
+                "examples": ["projects/{project-id}/branches/{branch-id}/endpoints/{endpoint-id}"],
                 "resolve": "postgres:endpointPath",
                 "origin": "cli"
               },
@@ -359,11 +392,10 @@
     },
     "rules": {
       "must": [
+        "Treat `databricks apps init` output as starter code, not requirements; adapt or replace it to match the requested app",
         "Keep all secrets and credentials only in app.yaml, databricks.yml, and/or .env"
       ],
-      "should": [
-        "ask user when in doubt of resource to use for plugin"
-      ],
+      "should": ["ask user when in doubt of resource to use for plugin"],
       "never": [
         "guess resources when multiple or no options are available",
         "embed secrets in files that will go to the client-bundle"

@@ -1,61 +1,86 @@
 # Databricks AI Bootcamp Portfolio
 
-Hands-on projects built with Databricks Apps, Lakebase PostgreSQL, pgvector, Spark, and MCP. Each project is a small, deployable product rather than a notebook-only exercise.
+[![CI](https://github.com/gfonesl/databricks-ai-bootcamp/actions/workflows/ci.yml/badge.svg)](https://github.com/gfonesl/databricks-ai-bootcamp/actions/workflows/ci.yml)
 
-## Featured project — Tripwise
+Production-minded data and AI projects built with Databricks Apps, Lakebase PostgreSQL, pgvector, Spark, and MCP. The portfolio focuses on deployable products: transactional applications, grounded retrieval, automated data pipelines, agent tools, access control, and reproducible verification.
 
-[**Tripwise AI Travel Planner**](capstone/tripwise-capstone/README.md) is the capstone: a weather-aware travel planner that combines a daily Spark pipeline, Delta Lake, Lakebase operational storage, semantic retrieval, and a FastMCP server that an agent can use to update an itinerary.
+## Featured project: Tripwise
+
+[Tripwise AI Travel Planner](capstone/tripwise-capstone/README.md) is a restricted weather-aware planning demo. A daily Spark job collects destination context, Delta preserves the analytical pipeline output, Lakebase stores operational and vector state, and a FastMCP 3 server exposes six stable tools to an authorized automation identity.
 
 ```mermaid
 flowchart LR
   S["Open-Meteo + Wikimedia"] --> P["Lakeflow Job / Spark"]
-  P --> D["Delta destination context"]
-  D --> L["Lakebase + pgvector"]
-  L --> A["Tripwise App / REST API"]
-  L --> M["FastMCP tools"]
-  M --> G["Travel Agent"]
+  P --> D["Delta context tables"]
+  D --> A["Authenticated pipeline API"]
+  A --> L["Lakebase + pgvector"]
+  L --> U["Owner-only web application"]
+  L --> M["Automation-only MCP tools"]
+  M --> G["Agent Bricks / supervisor"]
 ```
+
+The trust boundary is explicit: Databricks authenticates callers, Tripwise authorizes the forwarded subject as either `owner` or `automation`, and Lakebase credentials remain short-lived runtime values.
 
 ## Projects
 
-| Project | What it demonstrates | Stack |
+| Project | Demonstrates | Stack |
 | --- | --- | --- |
-| [Day 1 — Support Operations](homeworks/day-1-lakebase-support-app/README.md) | Transactional CRUD with relationships, validation, filtering, statistics, and persistence. | React, AppKit, Express, Lakebase |
-| [Day 2 — Weather Intelligence](homeworks/day-2-weather-intelligence/README_WEATHER.md) | Ingesting public weather narratives, content-aware upserts, embeddings, and semantic search. | Flask, NWS, psycopg2, pgvector |
-| [Day 3 — Weather MCP Agent](homeworks/day-3-weather-mcp-agent/README_DAY3.md) | A Streamable HTTP MCP server, deterministic travel guidance, and Lakebase telemetry for agent tool calls. | FastMCP, FastAPI, Flask, Open-Meteo, Lakebase |
-| [Tripwise — Capstone](capstone/tripwise-capstone/README.md) | A full data-and-agent application: Spark/Delta pipeline, operational App, semantic retrieval, and MCP write tools. | FastAPI, Spark, Delta, Lakebase, pgvector, FastMCP |
+| [Day 1 — Support Operations](homeworks/day-1-lakebase-support-app/README.md) | Transactional ticket CRUD, relational messages, filtering, statistics, accessible UI, and browser smoke tests. | React, TypeScript, AppKit, Express, Lakebase |
+| [Day 2 — Weather Intelligence](homeworks/day-2-weather-intelligence/README_WEATHER.md) | Public weather ingestion, content-aware upserts, deterministic chunking, embeddings, and semantic search. | Flask, NWS, psycopg2, pgvector |
+| [Day 3 — Weather MCP Agent](homeworks/day-3-weather-mcp-agent/README_DAY3.md) | FastMCP 3 Streamable HTTP tools, deterministic travel guidance, and non-sensitive Lakebase telemetry. | FastMCP, FastAPI, Flask, Open-Meteo, Lakebase |
+| [Tripwise — Capstone](capstone/tripwise-capstone/README.md) | Restricted full-stack data and agent application with atomic state replacement and authenticated pipeline/MCP integration. | FastAPI, Spark, Delta, Lakebase, pgvector, FastMCP 3 |
 
-## Engineering principles
+## Engineering standards
 
-- **Security by design:** secrets are injected at runtime through Databricks; no passwords, tokens, or connection strings are committed.
-- **Operational data belongs in Lakebase:** relational state and vector retrieval use PostgreSQL/pgvector; analytical pipeline outputs live in Delta.
-- **Reproducible deployments:** each deployable project contains a Databricks Asset Bundle. Public configuration files use placeholders; supply your own resource names at deploy time.
-- **Evidence before claims:** APIs validate inputs, repositories enforce foreign keys, and projects include focused automated tests.
+- Runtime and development dependencies are separated. Python lockfiles are fully pinned with artifact hashes; Node uses `npm ci`.
+- CI runs Ruff, all four Python test suites, lockfile audits, Node typecheck/lint/format/build, browser smoke tests, and `npm audit`.
+- Secrets, tokens, database passwords, workspace identifiers, generated bundles, and local tool state are excluded from source control.
+- Tripwise fails closed when its identity allowlists are missing, validates pipeline provenance and size limits, and exposes separate liveness and readiness endpoints.
+- Portfolio evidence is published only when it comes from a real run. No simulated screenshots are used.
 
-## Run a project locally
+See [SECURITY.md](SECURITY.md) for trust boundaries, secret handling, and vulnerability reporting.
 
-Each project contains its own dependencies and instructions. For example:
+## Reproduce local verification
 
-```powershell
+Install Python development tools from the deterministic lockfile, then run the same checks used by CI:
+
+```bash
+python -m pip install --require-hashes -r requirements-dev.txt
+ruff check .
+ruff format --check .
+```
+
+Each Python project has an independent runtime lockfile and test suite. For example:
+
+```bash
 cd capstone/tripwise-capstone
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-pytest -q
+python -m pip install --require-hashes -r requirements.txt
+TRIPWISE_AUTH_MODE=disabled TRIPWISE_SKIP_SCHEMA_INIT=1 python -m pytest tests -q
 ```
 
-The web applications require Lakebase credentials injected by Databricks for operational requests. Do not add production credentials to `.env` or to Git.
-
-## Deploy safely
-
-The bundle files intentionally contain no personal workspace identifiers. Pass your values at deployment time, for example:
+PowerShell equivalent:
 
 ```powershell
-databricks bundle validate --profile <PROFILE> --var postgres_branch=<LAKEBASE_BRANCH> --var postgres_database=<LAKEBASE_DATABASE>
+$env:TRIPWISE_AUTH_MODE = "disabled"
+$env:TRIPWISE_SKIP_SCHEMA_INIT = "1"
+python -m pytest tests -q
 ```
 
-See each project README for the complete variables and deployment flow.
+Day 1 verification is platform-independent:
 
-## Repository hygiene
+```bash
+cd homeworks/day-1-lakebase-support-app
+npm ci
+npm run typecheck
+npm run lint
+npm run format
+npm run build
+npm test
+npm audit --audit-level=low
+```
 
-This public repository excludes local agent tooling, Databricks workspace state, test caches, `.env` files, and submission ZIPs. The source code is intentionally kept separate from any runtime workspace, secret scope, service principal, or user data.
+Tests use fakes or browser request interception and do not require production secrets. Operational calls still require the Databricks/Lakebase runtime described in each project README.
+
+## Release checklist
+
+Before deployment, review the relevant bundle variables, supply resource names and identity subjects outside source control, and run `databricks bundle validate --strict`. Deployment and workspace integration tests are intentionally outside local CI because they require an authorized Databricks workspace.

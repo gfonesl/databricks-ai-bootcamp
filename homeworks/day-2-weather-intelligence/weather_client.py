@@ -5,11 +5,9 @@ import json
 import os
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime
 from typing import Any
 
 import requests
-
 from config import MAX_SYNC_LIMIT
 
 NWS_BASE_URL = "https://api.weather.gov"
@@ -178,14 +176,18 @@ class NWSWeatherClient:
             for period in forecast_properties.get("periods") or []
             if (
                 document := normalize_forecast_period(
-                    period, location, forecast_properties.get("generatedAt") or forecast_properties.get("updated")
+                    period,
+                    location,
+                    forecast_properties.get("generatedAt") or forecast_properties.get("updated"),
                 )
             )
             is not None
         )
         return documents
 
-    def collect(self, locations: list[str], limit: int = MAX_SYNC_LIMIT) -> tuple[list[WeatherDocument], list[dict[str, str]]]:
+    def collect(
+        self, locations: list[str], limit: int = MAX_SYNC_LIMIT
+    ) -> tuple[list[WeatherDocument], list[dict[str, str]]]:
         capped_limit = max(1, min(int(limit), MAX_SYNC_LIMIT))
         documents: list[WeatherDocument] = []
         warnings: list[dict[str, str]] = []
