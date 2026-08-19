@@ -36,6 +36,16 @@ CREATE EXTENSION IF NOT EXISTS vector;
 
 The App owns only its schema and does not perform database-level extension management. `databricks-sdk` generates temporary OAuth credentials for new psycopg2 connections; no database password is stored in the repository.
 
+## Dependencies
+
+Runtime dependencies are declared in `requirements.in` and compiled into a universal, hashed lockfile. Regenerate it on Windows or Unix with:
+
+```bash
+python scripts/compile_requirements.py
+```
+
+The generator resolves `torch` against the official CPU backend while resolving general dependencies from PyPI. It then emits the PyTorch CPU index for `pip --require-hashes` compatibility without changing the pinned package versions or accepted artifact hashes.
+
 ## API
 
 Liveness:
