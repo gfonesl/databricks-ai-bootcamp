@@ -5,7 +5,6 @@ from datetime import date
 from typing import Any
 
 import requests
-
 from config import (
     HTTP_TIMEOUT_SECONDS,
     HTTP_USER_AGENT,
@@ -83,7 +82,9 @@ class OpenMeteoWeatherAdapter:
             response.raise_for_status()
             body = response.json()
         except (requests.RequestException, ValueError) as error:
-            raise WeatherProviderError("The weather provider is temporarily unavailable. Please try again.") from error
+            raise WeatherProviderError(
+                "The weather provider is temporarily unavailable. Please try again."
+            ) from error
         if not isinstance(body, dict):
             raise WeatherProviderError("The weather provider returned an unexpected response.")
         return body
@@ -96,7 +97,9 @@ class OpenMeteoWeatherAdapter:
         )
         results = body.get("results")
         if not isinstance(results, list) or not results or not isinstance(results[0], dict):
-            raise LocationNotFoundError(f"I could not resolve the location '{cleaned}'. Try a city and country or state.")
+            raise LocationNotFoundError(
+                f"I could not resolve the location '{cleaned}'. Try a city and country or state."
+            )
         result = results[0]
         try:
             return ResolvedLocation(
@@ -107,7 +110,9 @@ class OpenMeteoWeatherAdapter:
                 timezone=str(result.get("timezone", "auto")),
             )
         except (KeyError, TypeError, ValueError) as error:
-            raise WeatherProviderError("The weather provider returned an incomplete location response.") from error
+            raise WeatherProviderError(
+                "The weather provider returned an incomplete location response."
+            ) from error
 
     def _forecast_payload(self, resolved: ResolvedLocation, days: int) -> dict[str, Any]:
         return self._get_json(
@@ -158,20 +163,33 @@ class OpenMeteoWeatherAdapter:
                     "condition": weather_description(_at(daily, "weather_code", index)),
                     "temperature_max_c": _at(daily, "temperature_2m_max", index),
                     "temperature_min_c": _at(daily, "temperature_2m_min", index),
-                    "precipitation_probability_percent": _at(daily, "precipitation_probability_max", index),
+                    "precipitation_probability_percent": _at(
+                        daily, "precipitation_probability_max", index
+                    ),
                     "rain_mm": _at(daily, "rain_sum", index),
                     "wind_speed_max_kmh": _at(daily, "wind_speed_10m_max", index),
                 }
             )
-        return {"location": resolved.label, "latitude": resolved.latitude, "longitude": resolved.longitude, "forecast": forecast, "source": "Open-Meteo"}
+        return {
+            "location": resolved.label,
+            "latitude": resolved.latitude,
+            "longitude": resolved.longitude,
+            "forecast": forecast,
+            "source": "Open-Meteo",
+        }
 
     def get_travel_recommendation(self, location: str, requested_date: str) -> dict[str, Any]:
         target = _iso_date(requested_date)
         forecast_payload = self.get_forecast(location, MAX_FORECAST_DAYS)
-        day = next((item for item in forecast_payload["forecast"] if item["date"] == target.isoformat()), None)
+        day = next(
+            (item for item in forecast_payload["forecast"] if item["date"] == target.isoformat()),
+            None,
+        )
         if day is None:
             available = [item["date"] for item in forecast_payload["forecast"]]
-            raise ValueError(f"{target.isoformat()} is outside the available forecast horizon ({available[0]} to {available[-1]}).")
+            raise ValueError(
+                f"{target.isoformat()} is outside the available forecast horizon ({available[0]} to {available[-1]})."
+            )
 
         recommendations: list[str] = []
         if _number(day["precipitation_probability_percent"]) >= 40:
@@ -181,16 +199,25 @@ class OpenMeteoWeatherAdapter:
         if _number(day["temperature_max_c"]) >= 30:
             recommendations.append("Plan for heat: water, shade, and sun protection.")
         if _number(day["wind_speed_max_kmh"]) >= 40:
-            recommendations.append("Expect strong wind; secure loose items and plan outdoor activities carefully.")
+            recommendations.append(
+                "Expect strong wind; secure loose items and plan outdoor activities carefully."
+            )
         if not recommendations:
-            recommendations.append("No special weather gear is indicated by the configured thresholds.")
+            recommendations.append(
+                "No special weather gear is indicated by the configured thresholds."
+            )
 
         return {
             "location": forecast_payload["location"],
             "date": target.isoformat(),
             "recommendation": recommendations,
             "evidence": day,
-            "thresholds": {"umbrella_precipitation_probability_percent": 40, "jacket_min_temperature_c": 15, "heat_max_temperature_c": 30, "wind_warning_kmh": 40},
+            "thresholds": {
+                "umbrella_precipitation_probability_percent": 40,
+                "jacket_min_temperature_c": 15,
+                "heat_max_temperature_c": 30,
+                "wind_warning_kmh": 40,
+            },
             "source": "Open-Meteo",
         }
 
@@ -203,13 +230,19 @@ def _location(value: Any) -> str:
 
 def _days(value: Any) -> int:
     if isinstance(value, bool):
-        raise ValueError(f"days must be an integer between {MIN_FORECAST_DAYS} and {MAX_FORECAST_DAYS}.")
+        raise ValueError(
+            f"days must be an integer between {MIN_FORECAST_DAYS} and {MAX_FORECAST_DAYS}."
+        )
     try:
         number = int(value)
     except (TypeError, ValueError) as error:
-        raise ValueError(f"days must be an integer between {MIN_FORECAST_DAYS} and {MAX_FORECAST_DAYS}.") from error
+        raise ValueError(
+            f"days must be an integer between {MIN_FORECAST_DAYS} and {MAX_FORECAST_DAYS}."
+        ) from error
     if not MIN_FORECAST_DAYS <= number <= MAX_FORECAST_DAYS:
-        raise ValueError(f"days must be an integer between {MIN_FORECAST_DAYS} and {MAX_FORECAST_DAYS}.")
+        raise ValueError(
+            f"days must be an integer between {MIN_FORECAST_DAYS} and {MAX_FORECAST_DAYS}."
+        )
     return number
 
 

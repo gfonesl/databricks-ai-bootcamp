@@ -1,6 +1,6 @@
 # Homework 3 — Weather MCP Server and Agent
 
-This project exposes live weather data as safe, inspectable MCP tools. It contains two independently deployable Databricks Apps: a FastMCP server that records non-sensitive tool telemetry in Lakebase, and a Flask dashboard that visualizes that telemetry.
+This project exposes live weather data as safe, inspectable MCP tools. It contains two independently deployable Databricks Apps: a FastMCP 3.4.7 server that records non-sensitive tool telemetry in Lakebase, and a Flask dashboard that visualizes that telemetry. The migration to FastMCP 3 preserves the existing tool names and parameters.
 
 ## Architecture
 

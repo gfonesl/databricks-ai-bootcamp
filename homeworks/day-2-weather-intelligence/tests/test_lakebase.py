@@ -8,7 +8,9 @@ from weather_client import ResolvedLocation, normalize_forecast_period
 class LakebaseRepositoryTests(unittest.TestCase):
     @patch("lakebase.execute_values")
     @patch("lakebase.lakebase_connection")
-    def test_upsert_documents_uses_idempotent_conflict_handling(self, connection_factory, execute_values):
+    def test_upsert_documents_uses_idempotent_conflict_handling(
+        self, connection_factory, execute_values
+    ):
         cursor = MagicMock()
         connection = MagicMock()
         connection.cursor.return_value.__enter__.return_value = cursor

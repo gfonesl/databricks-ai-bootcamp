@@ -4,10 +4,9 @@ import logging
 import os
 from typing import Any, Callable
 
-from flask import Flask, jsonify, request
-
 from config import DEFAULT_LOCATIONS, MAX_SEARCH_RESULTS, MAX_SYNC_LIMIT
 from embedding import EmbeddingError, embed_texts
+from flask import Flask, jsonify, request
 from lakebase import LakebaseError, WeatherRepository
 from weather_client import NWSWeatherClient, WeatherClientError
 
@@ -137,6 +136,7 @@ def create_app(
         </body>
         </html>
         """
+
     @app.post("/weather/sync")
     def sync_weather():
         try:

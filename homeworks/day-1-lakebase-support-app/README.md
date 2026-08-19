@@ -1,195 +1,75 @@
-# day1-support-app
+# Support Operations Console
 
-A Databricks App powered by [AppKit](https://www.databricks.com/devhub/docs/appkit/v0/), featuring React, TypeScript, and Tailwind CSS.
+A Databricks App for managing operational support tickets and their conversation history in Lakebase PostgreSQL. The project demonstrates a typed React interface, an Express/AppKit backend, relational persistence, input validation, and a reproducible browser smoke test.
 
-**Enabled plugins:**
-- **Lakebase** -- Fully managed Postgres database for transactional (OLTP) workloads on Databricks
-- **Server** -- Express HTTP server with static file serving and Vite dev mode
+## Product flow
 
-## Prerequisites
+Operators can filter the ticket queue, inspect status and priority, read message history, create tickets, append messages, and update status. Summary cards expose queue totals by status. The UI uses semantic headings and labeled controls so the main workflow remains keyboard- and screen-reader-friendly.
 
-- Node.js v22+ and npm
-- Databricks CLI (for deployment)
-- Access to a Databricks workspace
+```mermaid
+flowchart LR
+  U["React operations console"] --> API["Express / AppKit routes"]
+  API --> T["support_app.tickets"]
+  API --> M["support_app.ticket_messages"]
+  T --> M
+```
 
-## Databricks Authentication
+## Data and safety
 
-### Local Development
+- The App owns a dedicated `support_app` schema instead of relying on public tables.
+- Route handlers validate enums, lengths, identifiers, and state transitions before executing parameterized SQL.
+- Messages reference tickets through a foreign key, and database writes use transactions.
+- Lakebase credentials are supplied by the Databricks runtime. Do not commit tokens or passwords to `.env`.
+- Browser tests intercept API calls and use deterministic fixtures; screenshots or workspace claims are not simulated for portfolio evidence.
 
-For local development, configure your environment variables by creating a `.env` file:
+## Local development
+
+Requirements: Node.js 22 and npm. Databricks CLI authentication and Lakebase configuration are needed only for live backend operations.
 
 ```bash
-cp .env.example .env
-```
-
-Edit `.env` and set the environment variables you need:
-
-```env
-DATABRICKS_HOST=https://your-workspace.cloud.databricks.com
-DATABRICKS_APP_PORT=8000
-# ... other environment variables, depending on the plugins you use
-```
-
-#### Lakebase Configuration
-
-The Lakebase plugin requires additional environment variables for PostgreSQL connectivity. To learn how to configure the Lakebase plugin, see the [Lakebase plugin documentation](https://www.databricks.com/devhub/docs/appkit/v0/plugins/lakebase).
-
-### CLI Authentication
-
-The Databricks CLI requires authentication to deploy and manage apps. Configure authentication using one of these methods:
-
-#### OAuth U2M
-
-Interactive browser-based authentication with short-lived tokens:
-
-```bash
-databricks auth login --host https://your-workspace.cloud.databricks.com
-```
-
-This will open your browser to complete authentication. The CLI saves credentials to `~/.databrickscfg`.
-
-#### Configuration Profiles
-
-Use multiple profiles for different workspaces:
-
-```ini
-[DEFAULT]
-host = https://dev-workspace.cloud.databricks.com
-
-[production]
-host = https://prod-workspace.cloud.databricks.com
-client_id = prod-client-id
-client_secret = prod-client-secret
-```
-
-Deploy using a specific profile:
-
-```bash
-databricks bundle deploy --profile production
-```
-
-**Note:** Personal Access Tokens (PATs) are legacy authentication. OAuth is strongly recommended for better security.
-
-## Getting Started
-
-### Install Dependencies
-
-```bash
-npm install
-```
-
-### Development
-
-Run the app in development mode with hot reload:
-
-```bash
+npm ci
 npm run dev
 ```
 
-The app will be available at the URL shown in the console output.
+Copy `.env.example` to `.env` only when exercising the live AppKit backend, and keep that file local. OAuth is preferred over long-lived personal access tokens.
 
-### Build
+The npm scripts use `cross-env` and `rimraf`, so start, development, and clean commands work on Windows and Unix-like systems.
 
-Build both client and server for production:
-
-```bash
-npm run build
-```
-
-This creates:
-
-- `dist/server.js` - Compiled server bundle
-- `client/dist/` - Bundled client assets
-
-### Production
-
-Run the production build:
+## Verification
 
 ```bash
-npm start
-```
-
-## Code Quality
-
-There are a few commands to help you with code quality:
-
-```bash
-# Type checking
 npm run typecheck
-
-# Linting
 npm run lint
-npm run lint:fix
-
-# Formatting
 npm run format
-npm run format:fix
+npm run build
+npm test
+npm audit --audit-level=low
 ```
 
-## Deployment with Databricks Asset Bundles
+`npm test` runs Vitest and two Playwright smoke scenarios. The smoke server builds and previews the production client without contacting Databricks; API requests are intercepted in the browser. Live Lakebase integration remains a deployment verification step.
 
-### 1. Configure Bundle
+## Deployment
 
-Update `databricks.yml` with your workspace settings:
-
-```yaml
-targets:
-  default:
-    workspace:
-      host: https://your-workspace.cloud.databricks.com
-```
-
-Make sure to replace all placeholder values in `databricks.yml` with your actual resource IDs.
-
-### 2. Validate Bundle
+The bundle accepts Lakebase project, branch, and database resource names as variables. Validate with non-secret resource identifiers supplied at runtime:
 
 ```bash
-databricks bundle validate
+databricks bundle validate --strict \
+  --var postgres_project=<LAKEBASE_PROJECT> \
+  --var postgres_branch=<LAKEBASE_BRANCH> \
+  --var postgres_database=<LAKEBASE_DATABASE>
 ```
 
-### 3. Deploy
+Deploy only from an authenticated environment after reviewing the generated plan. No workspace host or user identifier is committed in the bundle.
 
-Deploy to the default target:
+## Structure
 
-```bash
-databricks bundle deploy
+```text
+client/             React, TypeScript, AppKit UI
+server/             Express entry point and Lakebase routes
+shared/             Generated AppKit types
+tests/              Playwright smoke coverage
+databricks.yml      Parameterized Asset Bundle
+app.yaml            Databricks App process definition
 ```
 
-### 4. Run
-
-Start the deployed app:
-
-```bash
-databricks bundle run <APP_NAME> -t dev
-```
-
-### Deploy to Production
-
-1. Configure the production target in `databricks.yml`
-2. Deploy to production:
-
-```bash
-databricks bundle deploy -t prod
-```
-
-## Project Structure
-
-```
-* client/          # React frontend
-  * src/           # Source code
-  * public/        # Static assets
-* server/          # Express backend
-  * server.ts      # Server entry point
-  * routes/        # Routes
-* shared/          # Shared types
-* databricks.yml   # Bundle configuration
-* app.yaml         # App configuration
-* .env.example     # Environment variables example
-```
-
-## Tech Stack
-
-- **Backend**: Node.js, Express
-- **Frontend**: React.js, TypeScript, Vite, Tailwind CSS, React Router
-- **UI Components**: Radix UI, shadcn/ui
-- **Databricks**: AppKit SDK
+The package is MIT licensed. Direct dependencies are pinned in `package.json`, the full graph is locked by `package-lock.json`, and CI installs it with `npm ci`.

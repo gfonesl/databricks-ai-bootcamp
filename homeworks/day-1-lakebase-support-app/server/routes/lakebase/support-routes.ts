@@ -7,23 +7,45 @@ const PRIORITY_VALUES = ['low', 'medium', 'high'] as const;
 const TicketStatus = z.enum(STATUS_VALUES);
 const TicketPriority = z.enum(PRIORITY_VALUES);
 
-const CreateTicketBody = z.object({
-  title: z.string().trim().min(3, 'Title must have at least 3 characters.').max(160, 'Title must have at most 160 characters.'),
-  priority: TicketPriority,
-  created_by: z.string().trim().min(2, 'Created by must have at least 2 characters.').max(80, 'Created by must have at most 80 characters.'),
-}).strict();
+const CreateTicketBody = z
+  .object({
+    title: z
+      .string()
+      .trim()
+      .min(3, 'Title must have at least 3 characters.')
+      .max(160, 'Title must have at most 160 characters.'),
+    priority: TicketPriority,
+    created_by: z
+      .string()
+      .trim()
+      .min(2, 'Created by must have at least 2 characters.')
+      .max(80, 'Created by must have at most 80 characters.'),
+  })
+  .strict();
 
-const CreateMessageBody = z.object({
-  message_text: z.string().trim().min(1, 'Message cannot be empty.').max(2000, 'Message must have at most 2000 characters.'),
-  author: z.string().trim().min(2, 'Author must have at least 2 characters.').max(80, 'Author must have at most 80 characters.'),
-}).strict();
+const CreateMessageBody = z
+  .object({
+    message_text: z
+      .string()
+      .trim()
+      .min(1, 'Message cannot be empty.')
+      .max(2000, 'Message must have at most 2000 characters.'),
+    author: z
+      .string()
+      .trim()
+      .min(2, 'Author must have at least 2 characters.')
+      .max(80, 'Author must have at most 80 characters.'),
+  })
+  .strict();
 
 const UpdateStatusBody = z.object({ status: TicketStatus }).strict();
 
-const TicketFilters = z.object({
-  status: TicketStatus.optional(),
-  priority: TicketPriority.optional(),
-}).strict();
+const TicketFilters = z
+  .object({
+    status: TicketStatus.optional(),
+    priority: TicketPriority.optional(),
+  })
+  .strict();
 
 interface LakebaseResult {
   rows: Record<string, unknown>[];
@@ -138,7 +160,8 @@ async function initializeSupportSchema(appkit: AppKitWithLakebase) {
   await appkit.lakebase.query(CREATE_TICKET_INDEX_SQL);
   await appkit.lakebase.query(CREATE_MESSAGE_INDEX_SQL);
   await appkit.lakebase.query(ENABLE_TICKETS_CDF_SQL);
-  await appkit.lakebase.query(ENABLE_MESSAGES_CDF_SQL);  await appkit.lakebase.query(SEED_SUPPORT_DATA_SQL);
+  await appkit.lakebase.query(ENABLE_MESSAGES_CDF_SQL);
+  await appkit.lakebase.query(SEED_SUPPORT_DATA_SQL);
 }
 
 async function getTicketDetail(appkit: AppKitWithLakebase, ticketId: number) {
@@ -146,7 +169,7 @@ async function getTicketDetail(appkit: AppKitWithLakebase, ticketId: number) {
     `SELECT ticket_id, title, status, priority, created_by, created_at, updated_at
      FROM support_app.tickets
      WHERE ticket_id = $1`,
-    [ticketId],
+    [ticketId]
   );
 
   if (ticketResult.rows.length === 0) {
@@ -158,7 +181,7 @@ async function getTicketDetail(appkit: AppKitWithLakebase, ticketId: number) {
      FROM support_app.ticket_messages
      WHERE ticket_id = $1
      ORDER BY created_at ASC, message_id ASC`,
-    [ticketId],
+    [ticketId]
   );
 
   return { ticket: ticketResult.rows[0], messages: messagesResult.rows };
@@ -189,7 +212,7 @@ export async function setupSupportRoutes(appkit: AppKitWithLakebase) {
            GROUP BY t.ticket_id
            ORDER BY t.updated_at DESC, t.ticket_id DESC
            LIMIT 100`,
-          [status ?? null, priority ?? null],
+          [status ?? null, priority ?? null]
         );
         response.json(result.rows);
       } catch (error) {
@@ -221,7 +244,7 @@ export async function setupSupportRoutes(appkit: AppKitWithLakebase) {
         const result = await appkit.lakebase.query(
           `SELECT status, COUNT(*)::int AS ticket_count
            FROM support_app.tickets
-           GROUP BY status`,
+           GROUP BY status`
         );
         const byStatus = { open: 0, in_progress: 0, resolved: 0 };
         for (const row of result.rows) {
@@ -251,7 +274,7 @@ export async function setupSupportRoutes(appkit: AppKitWithLakebase) {
           `INSERT INTO support_app.tickets (title, status, priority, created_by)
            VALUES ($1, 'open', $2, $3)
            RETURNING ticket_id, title, status, priority, created_by, created_at, updated_at`,
-          [parsedBody.data.title, parsedBody.data.priority, parsedBody.data.created_by],
+          [parsedBody.data.title, parsedBody.data.priority, parsedBody.data.created_by]
         );
         response.status(201).json(result.rows[0]);
       } catch (error) {
@@ -277,7 +300,7 @@ export async function setupSupportRoutes(appkit: AppKitWithLakebase) {
           `INSERT INTO support_app.ticket_messages (ticket_id, message_text, author)
            VALUES ($1, $2, $3)
            RETURNING message_id, ticket_id, message_text, author, created_at`,
-          [ticketId, parsedBody.data.message_text, parsedBody.data.author],
+          [ticketId, parsedBody.data.message_text, parsedBody.data.author]
         );
         response.status(201).json(result.rows[0]);
       } catch (error) {
@@ -308,7 +331,7 @@ export async function setupSupportRoutes(appkit: AppKitWithLakebase) {
            SET status = $1, updated_at = NOW()
            WHERE ticket_id = $2
            RETURNING ticket_id, title, status, priority, created_by, created_at, updated_at`,
-          [parsedBody.data.status, ticketId],
+          [parsedBody.data.status, ticketId]
         );
         if (result.rows.length === 0) {
           response.status(404).json({ error: 'Ticket not found.' });

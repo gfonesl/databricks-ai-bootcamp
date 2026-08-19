@@ -1,4 +1,5 @@
 """Manually generate Lakebase pgvector embeddings after a weather sync."""
+
 from __future__ import annotations
 
 import argparse
@@ -9,13 +10,17 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from embedding import chunk_text, embed_texts
-from lakebase import WeatherRepository
+from embedding import chunk_text, embed_texts  # noqa: E402
+from lakebase import WeatherRepository  # noqa: E402
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Embed new or changed weather documents in Lakebase.")
-    parser.add_argument("--limit", type=int, default=100, help="Maximum documents to embed (default: 100).")
+    parser = argparse.ArgumentParser(
+        description="Embed new or changed weather documents in Lakebase."
+    )
+    parser.add_argument(
+        "--limit", type=int, default=100, help="Maximum documents to embed (default: 100)."
+    )
     args = parser.parse_args()
     if args.limit < 1:
         parser.error("--limit must be at least 1")

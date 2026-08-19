@@ -8,7 +8,20 @@ from lakebase import LakebaseError
 
 class FakeRepository:
     def overview(self):
-        return {"overview": {"total_calls": 3, "failures": 1, "last_hour_calls": 2}, "activity": [{"tool_name": "get_current_weather", "location": "Chicago", "requested_date": None, "forecast_days": None, "outcome": "success", "summary": "ok", "created_at": "2026-08-10T12:00:00+00:00"}]}
+        return {
+            "overview": {"total_calls": 3, "failures": 1, "last_hour_calls": 2},
+            "activity": [
+                {
+                    "tool_name": "get_current_weather",
+                    "location": "Chicago",
+                    "requested_date": None,
+                    "forecast_days": None,
+                    "outcome": "success",
+                    "summary": "ok",
+                    "created_at": "2026-08-10T12:00:00+00:00",
+                }
+            ],
+        }
 
 
 class FailingRepository:

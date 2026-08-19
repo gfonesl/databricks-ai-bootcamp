@@ -1,0 +1,8 @@
+# Regenerate the hashed runtime lock with: python scripts/compile_requirements.py
+Flask>=3.1,<4
+Gunicorn>=23,<24
+psycopg2-binary==2.9.10
+databricks-sdk==0.104.0
+requests==2.34.2
+torch==2.6.0+cpu
+sentence-transformers==5.7.0

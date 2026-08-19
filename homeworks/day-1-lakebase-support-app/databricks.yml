@@ -12,8 +12,8 @@ variables:
 resources:
   apps:
     app:
-      name: "day1-support-app"
-      description: "Lakebase-powered internal support ticket app for Databricks AI Bootcamp Day 1."
+      name: 'day1-support-app'
+      description: 'Lakebase-powered internal support ticket app for Databricks AI Bootcamp Day 1.'
       source_code_path: ./
       # Uncomment to enable on behalf of user API scopes. Available scopes: sql, dashboards.genie, files.files, serving.serving-endpoints
       # user_api_scopes:

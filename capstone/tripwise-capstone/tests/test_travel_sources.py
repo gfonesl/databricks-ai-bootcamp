@@ -13,6 +13,17 @@ def test_weather_risk_levels():
 
 
 def test_packing_rules_are_explainable():
-    items = packing_recommendations({"precipitation_probability_max": 50, "temperature_min": 12, "temperature_max": 32, "wind_speed_max": 45})
-    assert {item["item"] for item in items} == {"Umbrella or rain shell", "Warm layer or jacket", "Sunscreen and water bottle", "Wind-resistant outer layer"}
-
+    items = packing_recommendations(
+        {
+            "precipitation_probability_max": 50,
+            "temperature_min": 12,
+            "temperature_max": 32,
+            "wind_speed_max": 45,
+        }
+    )
+    assert {item["item"] for item in items} == {
+        "Umbrella or rain shell",
+        "Warm layer or jacket",
+        "Sunscreen and water bottle",
+        "Wind-resistant outer layer",
+    }

@@ -16,6 +16,14 @@ variables:
     description: Databricks secret scope holding the pipeline OAuth secret.
   pipeline_oauth_secret_key:
     description: Secret key holding the pipeline OAuth secret.
+  owner_user_name:
+    description: Databricks user name granted CAN_USE on the restricted demo App.
+  owner_subject:
+    description: X-Forwarded-User subject for the portfolio owner.
+  automation_service_principal_name:
+    description: Service principal application ID used by the pipeline and Agent Bricks.
+  automation_subject:
+    description: X-Forwarded-User subject for the automation service principal.
 
 resources:
   apps:
@@ -23,6 +31,19 @@ resources:
       name: tripwise-capstone
       description: AI travel and outdoor activity planner with Lakebase, Spark and MCP.
       source_code_path: .
+      permissions:
+        - user_name: ${var.owner_user_name}
+          level: CAN_USE
+        - service_principal_name: ${var.automation_service_principal_name}
+          level: CAN_USE
+      config:
+        env:
+          - name: TRIPWISE_AUTH_MODE
+            value: enforce
+          - name: TRIPWISE_OWNER_SUBJECTS
+            value: ${var.owner_subject}
+          - name: TRIPWISE_AUTOMATION_SUBJECTS
+            value: ${var.automation_subject}
       resources:
         - name: postgres
           postgres:
@@ -42,12 +63,13 @@ resources:
           spec:
             client: "4"
             dependencies:
-              - databricks-sdk>=0.81.0
-              - requests>=2.32.0
+              - databricks-sdk==0.104.0
+              - requests==2.34.2
       tasks:
         - task_key: ingest_destination_context
           environment_key: tripwise_python
-          max_retries: 0
+          max_retries: 2
+          min_retry_interval_millis: 60000
           spark_python_task:
             python_file: ./jobs/tripwise_pipeline.py
             parameters:
@@ -59,7 +81,8 @@ resources:
               - default
         - task_key: vectorize_context
           environment_key: tripwise_python
-          max_retries: 0
+          max_retries: 2
+          min_retry_interval_millis: 60000
           depends_on:
             - task_key: ingest_destination_context
           spark_python_task:

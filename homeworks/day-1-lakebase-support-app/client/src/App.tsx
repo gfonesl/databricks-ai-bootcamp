@@ -121,9 +121,10 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const body: unknown = await response.json().catch(() => null);
 
   if (!response.ok) {
-    const message = typeof body === 'object' && body !== null && 'error' in body && typeof body.error === 'string'
-      ? body.error
-      : 'The request could not be completed.';
+    const message =
+      typeof body === 'object' && body !== null && 'error' in body && typeof body.error === 'string'
+        ? body.error
+        : 'The request could not be completed.';
     throw new Error(message);
   }
 
@@ -307,11 +308,18 @@ export default function App() {
         {showTicketForm && (
           <Card>
             <CardHeader>
-              <CardTitle>Create a support ticket</CardTitle>
+              <CardTitle>
+                <h2>Create a support ticket</h2>
+              </CardTitle>
               <CardDescription>All fields are required. The ticket starts with status Open.</CardDescription>
             </CardHeader>
             <CardContent>
-              <form className="grid gap-4 md:grid-cols-3" onSubmit={(event) => { void createTicket(event); }}>
+              <form
+                className="grid gap-4 md:grid-cols-3"
+                onSubmit={(event) => {
+                  void createTicket(event);
+                }}
+              >
                 <div className="space-y-2 md:col-span-3">
                   <Label htmlFor="ticket-title">Title</Label>
                   <Input
@@ -326,7 +334,10 @@ export default function App() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="ticket-priority">Priority</Label>
-                  <Select value={ticketPriority} onValueChange={(value) => setTicketPriority(ticketPriorityFromValue(value))}>
+                  <Select
+                    value={ticketPriority}
+                    onValueChange={(value) => setTicketPriority(ticketPriorityFromValue(value))}
+                  >
                     <SelectTrigger id="ticket-priority" aria-label="Ticket priority">
                       <SelectValue />
                     </SelectTrigger>
@@ -351,7 +362,7 @@ export default function App() {
                 </div>
                 <div className="flex items-center gap-2 md:col-span-3">
                   <Button type="submit" disabled={actionLoading === 'ticket'}>
-                    {actionLoading === 'ticket' ? 'Creating?w^~)?v' : 'Create ticket'}
+                    {actionLoading === 'ticket' ? 'Creating...' : 'Create ticket'}
                   </Button>
                   <Button type="button" variant="ghost" onClick={() => setShowTicketForm(false)}>
                     Cancel
@@ -366,8 +377,12 @@ export default function App() {
           <Card>
             <CardHeader className="space-y-4">
               <div>
-                <CardTitle>Tickets</CardTitle>
-                <CardDescription>Filter the operational queue, then select a ticket for its conversation.</CardDescription>
+                <CardTitle>
+                  <h2>Tickets</h2>
+                </CardTitle>
+                <CardDescription>
+                  Filter the operational queue, then select a ticket for its conversation.
+                </CardDescription>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-2">
@@ -386,7 +401,10 @@ export default function App() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="priority-filter">Priority</Label>
-                  <Select value={priorityFilter} onValueChange={(value) => setPriorityFilter(priorityFilterFromValue(value))}>
+                  <Select
+                    value={priorityFilter}
+                    onValueChange={(value) => setPriorityFilter(priorityFilterFromValue(value))}
+                  >
                     <SelectTrigger id="priority-filter" aria-label="Filter tickets by priority">
                       <SelectValue />
                     </SelectTrigger>
@@ -403,7 +421,9 @@ export default function App() {
             <CardContent>
               {listLoading ? (
                 <div className="space-y-3">
-                  {[1, 2, 3].map((item) => <Skeleton key={item} className="h-14 w-full" />)}
+                  {[1, 2, 3].map((item) => (
+                    <Skeleton key={item} className="h-14 w-full" />
+                  ))}
                 </div>
               ) : tickets.length === 0 ? (
                 <Empty>
@@ -432,10 +452,16 @@ export default function App() {
                       >
                         <TableCell>
                           <div className="font-medium">{ticket.title}</div>
-                          <div className="text-xs text-muted-foreground">Opened by {ticket.created_by} / {formatDate(ticket.created_at)}</div>
+                          <div className="text-xs text-muted-foreground">
+                            Opened by {ticket.created_by} / {formatDate(ticket.created_at)}
+                          </div>
                         </TableCell>
-                        <TableCell><Badge variant={statusBadgeVariant(ticket.status)}>{formatStatus(ticket.status)}</Badge></TableCell>
-                        <TableCell><Badge variant={priorityBadgeVariant(ticket.priority)}>{ticket.priority}</Badge></TableCell>
+                        <TableCell>
+                          <Badge variant={statusBadgeVariant(ticket.status)}>{formatStatus(ticket.status)}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={priorityBadgeVariant(ticket.priority)}>{ticket.priority}</Badge>
+                        </TableCell>
                         <TableCell className="text-right">{ticket.message_count}</TableCell>
                       </TableRow>
                     ))}
@@ -447,7 +473,9 @@ export default function App() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Ticket detail</CardTitle>
+              <CardTitle>
+                <h2>Ticket detail</h2>
+              </CardTitle>
               <CardDescription>Messages and status changes are saved directly to Lakebase.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
@@ -463,15 +491,24 @@ export default function App() {
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <h2 className="text-xl font-semibold">{selectedTicket.ticket.title}</h2>
-                        <p className="text-sm text-muted-foreground">Created by {selectedTicket.ticket.created_by} / {formatDate(selectedTicket.ticket.created_at)}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Created by {selectedTicket.ticket.created_by} / {formatDate(selectedTicket.ticket.created_at)}
+                        </p>
                       </div>
                       <div className="flex gap-2">
-                        <Badge variant={statusBadgeVariant(selectedTicket.ticket.status)}>{formatStatus(selectedTicket.ticket.status)}</Badge>
-                        <Badge variant={priorityBadgeVariant(selectedTicket.ticket.priority)}>{selectedTicket.ticket.priority}</Badge>
+                        <Badge variant={statusBadgeVariant(selectedTicket.ticket.status)}>
+                          {formatStatus(selectedTicket.ticket.status)}
+                        </Badge>
+                        <Badge variant={priorityBadgeVariant(selectedTicket.ticket.priority)}>
+                          {selectedTicket.ticket.priority}
+                        </Badge>
                       </div>
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row">
-                      <Select value={statusDraft} onValueChange={(value) => setStatusDraft(ticketStatusFromValue(value))}>
+                      <Select
+                        value={statusDraft}
+                        onValueChange={(value) => setStatusDraft(ticketStatusFromValue(value))}
+                      >
                         <SelectTrigger aria-label="Ticket status" className="sm:w-48">
                           <SelectValue />
                         </SelectTrigger>
@@ -481,8 +518,12 @@ export default function App() {
                           <SelectItem value="resolved">Resolved</SelectItem>
                         </SelectContent>
                       </Select>
-                      <Button variant="outline" onClick={() => void updateStatus()} disabled={actionLoading === 'status'}>
-                        {actionLoading === 'status' ? 'Updating?w^~)?v' : 'Update status'}
+                      <Button
+                        variant="outline"
+                        onClick={() => void updateStatus()}
+                        disabled={actionLoading === 'status'}
+                      >
+                        {actionLoading === 'status' ? 'Updating...' : 'Update status'}
                       </Button>
                     </div>
                   </div>
@@ -496,18 +537,25 @@ export default function App() {
                           <EmptyDescription>Add the first update for this ticket below.</EmptyDescription>
                         </EmptyHeader>
                       </Empty>
-                    ) : selectedTicket.messages.map((message) => (
-                      <div key={message.message_id} className="rounded-lg border p-3">
-                        <div className="mb-1 flex items-center justify-between gap-3 text-sm">
-                          <span className="font-medium">{message.author}</span>
-                          <span className="text-muted-foreground">{formatDate(message.created_at)}</span>
+                    ) : (
+                      selectedTicket.messages.map((message) => (
+                        <div key={message.message_id} className="rounded-lg border p-3">
+                          <div className="mb-1 flex items-center justify-between gap-3 text-sm">
+                            <span className="font-medium">{message.author}</span>
+                            <span className="text-muted-foreground">{formatDate(message.created_at)}</span>
+                          </div>
+                          <p className="whitespace-pre-wrap text-sm">{message.message_text}</p>
                         </div>
-                        <p className="whitespace-pre-wrap text-sm">{message.message_text}</p>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
 
-                  <form className="space-y-3 border-t pt-5" onSubmit={(event) => { void addMessage(event); }}>
+                  <form
+                    className="space-y-3 border-t pt-5"
+                    onSubmit={(event) => {
+                      void addMessage(event);
+                    }}
+                  >
                     <div className="flex items-center gap-2">
                       <MessageSquarePlus className="h-4 w-4" />
                       <h3 className="font-medium">Add message</h3>
@@ -537,7 +585,7 @@ export default function App() {
                       />
                     </div>
                     <Button type="submit" disabled={actionLoading === 'message'}>
-                      {actionLoading === 'message' ? 'Adding?w^~)?v' : 'Add message'}
+                      {actionLoading === 'message' ? 'Adding...' : 'Add message'}
                     </Button>
                   </form>
                 </>

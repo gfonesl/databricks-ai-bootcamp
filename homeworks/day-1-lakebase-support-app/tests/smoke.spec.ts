@@ -44,8 +44,20 @@ test.beforeEach(async ({ page }) => {
         json: {
           ticket: tickets[0],
           messages: [
-            { message_id: 1, ticket_id: 1, message_text: 'I receive a permission error.', author: 'Marina Costa', created_at: '2026-08-05T10:00:00.000Z' },
-            { message_id: 2, ticket_id: 1, message_text: 'The platform team is reviewing access.', author: 'Support team', created_at: '2026-08-05T10:05:00.000Z' },
+            {
+              message_id: 1,
+              ticket_id: 1,
+              message_text: 'I receive a permission error.',
+              author: 'Marina Costa',
+              created_at: '2026-08-05T10:00:00.000Z',
+            },
+            {
+              message_id: 2,
+              ticket_id: 1,
+              message_text: 'The platform team is reviewing access.',
+              author: 'Support team',
+              created_at: '2026-08-05T10:05:00.000Z',
+            },
           ],
         },
       });

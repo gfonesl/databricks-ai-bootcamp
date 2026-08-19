@@ -11,4 +11,3 @@ def test_chunking_preserves_content_and_overlap():
 
 def test_vector_literal():
     assert vector_literal([0.1, 2]) == "[0.1,2]"
-

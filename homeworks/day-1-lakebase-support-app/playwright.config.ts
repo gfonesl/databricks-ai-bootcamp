@@ -21,7 +21,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev',
+    // API calls are mocked by the smoke suite, so serve the production client
+    // without requiring Databricks credentials or a live Lakebase instance.
+    command: 'npm run build:client && npm run preview:client',
     url: `http://localhost:${process.env.DATABRICKS_APP_PORT || process.env.PORT || 8000}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,

@@ -6,16 +6,15 @@ from functools import lru_cache
 from typing import Any, Iterable
 
 import psycopg2
-from databricks.sdk import WorkspaceClient
-from psycopg2.extras import Json, RealDictCursor, execute_values
-
 from config import (
     DOCUMENTS_TABLE,
     EMBEDDING_DIMENSIONS,
     EMBEDDING_MODEL,
     EMBEDDINGS_TABLE,
 )
+from databricks.sdk import WorkspaceClient
 from embedding import vector_literal
+from psycopg2.extras import Json, RealDictCursor, execute_values
 from weather_client import WeatherDocument
 
 
@@ -67,7 +66,9 @@ def lakebase_connection():
     except psycopg2.Error as error:
         if connection:
             connection.rollback()
-        raise LakebaseError("Lakebase operation failed. Check the App resource and permissions.") from error
+        raise LakebaseError(
+            "Lakebase operation failed. Check the App resource and permissions."
+        ) from error
     finally:
         if connection:
             connection.close()
@@ -204,7 +205,9 @@ class WeatherRepository:
         rows = list(chunks_and_vectors)
         with lakebase_connection() as connection:
             with connection.cursor() as cursor:
-                cursor.execute(f"DELETE FROM {EMBEDDINGS_TABLE} WHERE document_id = %s", (document_id,))
+                cursor.execute(
+                    f"DELETE FROM {EMBEDDINGS_TABLE} WHERE document_id = %s", (document_id,)
+                )
                 if rows:
                     execute_values(
                         cursor,

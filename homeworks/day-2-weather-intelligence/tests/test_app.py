@@ -18,7 +18,14 @@ class FakeRepository:
 
     def semantic_search(self, vector, top_k):
         self.search_arguments = (vector, top_k)
-        return [{"location": "Chicago, IL", "headline": "Flood Watch", "chunk_text": "Flood risk", "similarity": 0.91}]
+        return [
+            {
+                "location": "Chicago, IL",
+                "headline": "Flood Watch",
+                "chunk_text": "Flood risk",
+                "similarity": 0.91,
+            }
+        ]
 
 
 class FakeWeatherClient:
@@ -57,8 +64,11 @@ class WeatherApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Weather Intelligence", response.data)
         self.assertIn(b"Sync weather data", response.data)
+
     def test_sync_persists_documents_and_keeps_location_warning(self):
-        response = self.client.post("/weather/sync", json={"locations": ["Chicago, IL"], "limit": 10})
+        response = self.client.post(
+            "/weather/sync", json={"locations": ["Chicago, IL"], "limit": 10}
+        )
         self.assertEqual(response.status_code, 200)
         payload = response.get_json()
         self.assertEqual(payload["documents_written"], 1)
@@ -74,7 +84,9 @@ class WeatherApiTests(unittest.TestCase):
         invalid = self.client.post("/weather/search", json={"query": "", "top_k": 5})
         self.assertEqual(invalid.status_code, 400)
 
-        response = self.client.post("/weather/search", json={"query": "flash flood risk", "top_k": 3})
+        response = self.client.post(
+            "/weather/search", json={"query": "flash flood risk", "top_k": 3}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json()["results"][0]["headline"], "Flood Watch")
         self.assertEqual(self.repository.search_arguments[1], 3)
